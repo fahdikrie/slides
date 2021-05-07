@@ -337,7 +337,7 @@
             style="text-align: left;"
             data-auto-animate
           >
-            <h2 style="color: #61DAFB;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB; margin: 0 -2px 10px;">React Hooks ⚛️</h2>
             Introduced in React 16.8, React Hooks is a set of function which allows
             developers to "hook into" <u>React state and Lifecycle</u> without having
             to use Class Component.
@@ -352,7 +352,17 @@
             <h2 style="color: #61DAFB;">Hooks #1: <span style="text-transform: none;">useState</span></h2>
           </section>
 
-          <!-- Subslide 4.4 -->
+          <!-- Subslide 4.4b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #1: <span style="text-transform: none;">useState</span></h2>
+            A hook that allows us to <u>create state variables</u> in a React function component.
+          </section>
+
+          <!-- Subslide 4.4b -->
           <section
             style="text-align: left;"
             data-auto-animate
@@ -469,7 +479,7 @@
                 <ul style="font-size: 2rem;">
                   <li style="filter: opacity(50%);">Returns a <b>stateful value</b>, and <b>a function</b> to update it.</li>
                   <li style="filter: opacity(50%);">setState <b>accepts new state</b> and <b>triggers component re-render</b></li>
-                  <li>Use callback on setState as argument when using previous state in computation</li>
+                  <li>Pass callback function on setState <b>when using previous state</b> in computation</li>
                 </ul>
               </div>
 
@@ -497,7 +507,7 @@
             </div>
           </section>
 
-          <!-- Subslide 4.x -->
+          <!-- Subslide 4.5 -->
           <section
             style="text-align: left;"
             data-auto-animate
@@ -505,8 +515,309 @@
             <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
             <h2 style="color: #61DAFB;">Hooks #2: <span style="text-transform: none;">useEffect</span></h2>
           </section>
-        </section>
 
+          <!-- Subslide 4.5a -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #2: <span style="text-transform: none;">useEffect</span></h2>
+            A hook that lets us <u>perform side effects</u> in function components.
+          </section>
+
+          <!-- Subslide 4.5b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #2: <span style="text-transform: none;">useEffect</span></h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers="4-12"
+            >
+              const useWindowSize = () => {
+                const [width, setWidth] = useState<number | null>(window.innerWidth)
+
+                useEffect(() => {
+                  let Mounted: boolean = true;
+                  if (mounted) window.addEventListener("resize", () => setWidth(window.innerWidth));
+
+                  return () => {
+                    isMounted = false;
+                    window.removeEventListener("resize", () => {});
+                  }
+                }, [])
+
+                return width;
+              };
+            </code></pre>
+          </section>
+
+          <!-- Subslide 4.5c -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #2: <span style="text-transform: none;">useEffect</span></h2>
+            <div style="display: flex;">
+              <div style="width: 50%;">
+                <ul style="font-size: 2rem;">
+                  <li>Accepts a <b>function that contains side effects</b></li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="2-4"
+                >
+                  // Code extracted from previous slide
+                  useEffect(() => {
+                    let Mounted: boolean = true;
+                    if (mounted) window.addEventListener("resize", () => setWidth(window.innerWidth));
+
+                    return () => {
+                      isMounted = false;
+                      window.removeEventListener("resize", () => {});
+                    }
+                  }, []);
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 4.5d -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #2: <span style="text-transform: none;">useEffect</span></h2>
+            <div style="display: flex;">
+              <div style="width: 50%;">
+                <ul style="font-size: 2rem;">
+                  <li style="filter: opacity(50%);">Accepts a <b>function that contains side effects</b></li>
+                  <li>Return statement is usually for <b>"cleaning up" side effects</b></li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="6-9"
+                >
+                  // Code extracted from previous slide
+                  useEffect(() => {
+                    let Mounted: boolean = true;
+                    if (mounted) window.addEventListener("resize", () => setWidth(window.innerWidth));
+
+                    return () => {
+                      isMounted = false;
+                      window.removeEventListener("resize", () => {});
+                    }
+                  }, []);
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 4.5e -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #2: <span style="text-transform: none;">useEffect</span></h2>
+            <div style="display: flex; justify-content: space-between;">
+              <div style="width: 49.5%;">
+                <ul style="font-size: 2rem;">
+                  <li style="filter: opacity(50%);">Accepts a <b>function that contains side effects</b></li>
+                  <li style="filter: opacity(50%);">Return statement is usually for <b>"cleaning up" side effects</b></li>
+                  <li>Can accept <b>array of deps</b> as second argument</li>
+                  <li>useEffect will <b>retrigger</b> everytime a change is happening on the dependencies</li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="10"
+                >
+                  // Code extracted from previous slide
+                  useEffect(() => {
+                    let Mounted: boolean = true;
+                    if (mounted) window.addEventListener("resize", () => setWidth(window.innerWidth));
+
+                    return () => {
+                      isMounted = false;
+                      window.removeEventListener("resize", () => {});
+                    }
+                  }, []);
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 4.6 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Live Coding 💻</h2>
+          </section>
+
+          <!-- Subslide 4.6 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #3: <span style="text-transform: none;">useContext</span></h2>
+          </section>
+
+          <!-- Subslide 4.6a -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #3: <span style="text-transform: none;">useContext</span></h2>
+            A hooks that helps us <u>avoid props drilling</u>.
+          </section>
+
+          <!-- Subslide 4.6b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #3: <span style="text-transform: none;">useContext</span></h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              const themes = {
+                light: {
+                  foreground: "#000000",
+                  background: "#eeeeee"
+                },
+                dark: {
+                  foreground: "#ffffff",
+                  background: "#222222"
+                }
+              };
+
+              const ThemeContext = React.createContext(themes.light);
+
+              // App.jsx
+              function App() {
+                return (
+                  &lt;ThemeContext.Provider value={themes.dark}>
+                    &lt;Toolbar />
+                  &lt;/ThemeContext.Provider>
+                );
+              }
+
+              // Toolbar.jsx
+              function Toolbar(props) {
+                return (
+                  &lt;div>
+                    &lt;ThemedButton />
+                  &lt;/div>
+                );
+              }
+
+              // ThemedButton.jsx
+              function ThemedButton() {
+                const theme = useContext(ThemeContext);
+                return (
+                  &lt;button style={{ background: theme.background, color: theme.foreground }}>
+                    I am styled by theme context!
+                  &lt;/button>
+                );
+              }
+            </code></pre>
+          </section>
+
+          <!-- Subslide 4.7 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #4: <span style="text-transform: none;">useReducer</span></h2>
+          </section>
+
+          <!-- Subslide 4.7a -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #4: <span style="text-transform: none;">useReducer</span></h2>
+            A <u>very powerful alternative</u> to useState.
+          </section>
+
+          <!-- Subslide 4.7b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #4: <span style="text-transform: none;">useReducer</span></h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              const initialState = {count: 0};
+
+              function reducer(state, action) {
+                switch (action.type) {
+                  case 'increment':
+                    return {count: state.count + 1};
+                  case 'decrement':
+                    return {count: state.count - 1};
+                  default:
+                    throw new Error();
+                }
+              }
+
+              function Counter() {
+                const [state, dispatch] = useReducer(reducer, initialState);
+                return (
+                  &lt;>
+                    Count: {state.count}
+                    &lt;button onClick={() => dispatch({type: 'decrement'})}>-&lt;/button>
+                    &lt;button onClick={() => dispatch({type: 'increment'})}>+&lt;/button>
+                  &lt;/>
+                );
+              }
+            </code></pre>
+          </section>
+        </section>
+        </section>
       </div>
     </div>
 
