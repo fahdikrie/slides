@@ -1,40 +1,529 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>React Hooks ⚛️</title>
 
-		<link rel="stylesheet" href="./reveal.js/dist/reset.css">
-		<link rel="stylesheet" href="./reveal.js/dist/reveal.css">
-		<link rel="stylesheet" href="./reveal.js/dist/theme/black.css" id="theme">
+    <link rel="stylesheet" href="./reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="./reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="./reveal.js/dist/theme/black.css" id="theme">
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="./reveal.js/plugin/highlight/monokai.css" id="highlight-theme">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="./reveal.js/plugin/highlight/monokai.css" id="highlight-theme">
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
 
-		<script src="./reveal.js/dist/reveal.js"></script>
-		<script src="./reveal.js/plugin/notes/notes.js"></script>
-		<script src="./reveal.js/plugin/markdown/markdown.js"></script>
-		<script src="./reveal.js/plugin/highlight/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+        <!-- Slide 1 - Opening Slide -->
+        <section data-background-color="#282C34">
+          <h5>Ristek Internal Class Week 2</h5>
+          <h2 class="r-fit-text" style="color: #61DAFB;">
+            React Hooks and Lifecycle
+          </h2>
+        </section>
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
-			});
-		</script>
-	</body>
+        <!-- Slide 2 - Class Component vs Functional Component -->
+        <section>
+          <!-- Subslide 2.1 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <p style="font-size: 1.5rem; margin: 0 3px 1rem;">Once upon a time in a pre-16.8 React...</p>
+            <h2 style="color: #61DAFB;">Class Component 🆚 Functional Component</h2>
+          </section>
+
+          <section
+            style="text-align: center;"
+            data-auto-animate
+          >
+            <h2 class="r-fit-text" style="color: #61DAFB;">Class Component 🆚 Functional Component</h2>
+            <div style="display: flex; flex-direction: row;">
+              <div style="width: 50%;" align="center">
+                <p style="font-size: 2rem;">Class Component (Stateful)</p>
+                <pre><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers
+                >
+                  import React, { Component } from 'react';
+
+                  class FriendStatusWithCounter extends Component {
+                    // Has state
+                    constructor(props) {
+                      super(props);
+                      this.state = { count: 0, isOnline: null };
+                      this.handleStatusChange = this.handleStatusChange.bind(this);
+                    }
+
+                    // Has access to React Lifecycle Methods
+                    componentDidMount() {
+                      document.title = `You clicked ${this.state.count} times`;
+                      ChatAPI.subscribeToFriendStatus(
+                        this.props.friend.id,
+                        this.handleStatusChange
+                      );
+                    }
+
+                    componentDidUpdate() {
+                      document.title = `You clicked ${this.state.count} times`;
+                    }
+
+                    componentWillUnmount() {
+                      ChatAPI.unsubscribeFromFriendStatus(
+                        this.props.friend.id,
+                        this.handleStatusChange
+                      );
+                    }
+
+                    handleStatusChange(status) {
+                      this.setState({
+                        isOnline: status.isOnline
+                      });
+                    }
+
+                    ...
+                  }
+                </code></pre>
+              </div>
+              <div style="width: 50%;" align="center">
+                <p style="font-size: 2rem;">Functional Component (Stateless)</p>
+                <pre><code
+                  class="lang-javascript"
+                  style="font-size: 1rem;"
+                  data-trim
+                  data-line-numbers
+                >
+                  import React from 'react';
+
+                  function FriendStatusWithCounter(props) {
+                    // Error 404: State not found
+                    return &lt;&gt;{props.username}&lt;/&gt;
+                  }
+                </code></pre>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Slide 3 - Problems (from using Class Components) -->
+        <section>
+          <!-- Subslide 3.1 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="color: #61DAFB; margin: 0;">Problems 🤯</h2>
+            <p style="font-size: 1.5rem; margin: 0 3px;">From using Class Component</p>
+          </section>
+
+          <!-- Subslide 3.2 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Problems 🤯</h2>
+            <h2 style="font-size: 3.5rem; text-transform: none; color: #61DAFB; margin: 0;">
+              Complex components become hard to understand</h2>
+          </section>
+
+          <!-- Subslide 3.2b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Problems 🤯</h2>
+            <h2 style="font-size: 3.5rem; text-transform: none; color: #61DAFB; margin: 0;">
+              Complex components become hard to understand</h2>
+            <pre><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              import React, { Component } from 'react';
+
+              class FriendStatusWithCounter extends Component {
+                // Has state
+                constructor(props) {
+                  super(props);
+                  this.state = { count: 0, isOnline: null };
+                  this.handleStatusChange = this.handleStatusChange.bind(this);
+                }
+
+                // Has access to React Lifecycle Methods
+                componentDidMount() {
+                  document.title = `You clicked ${this.state.count} times`;
+                  ChatAPI.subscribeToFriendStatus(
+                    this.props.friend.id,
+                    this.handleStatusChange
+                  );
+                }
+
+                componentDidUpdate() {
+                  document.title = `You clicked ${this.state.count} times`;
+                }
+
+                componentWillUnmount() {
+                  ChatAPI.unsubscribeFromFriendStatus(
+                    this.props.friend.id,
+                    this.handleStatusChange
+                  );
+                }
+
+                handleStatusChange(status) {
+                  this.setState({
+                    isOnline: status.isOnline
+                  });
+                }
+
+                ...
+              }
+            </code></pre>
+          </section>
+
+          <!-- Subslide 3.3 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Problems 🤯</h2>
+            <h2 style="font-size: 3.5rem; text-transform: none; color: #61DAFB; margin: 0;">
+              Classes confuse both people and machines</h2>
+          </section>
+
+          <!-- Subslide 3.3b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Problems 🤯</h2>
+            <h2 style="font-size: 3.5rem; text-transform: none; color: #61DAFB; margin: 0;">
+              Classes confuse both people and machines</h2>
+            <pre><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              import React, { Component } from 'react';
+
+              class FriendStatusWithCounter extends Component {
+                // Has state
+                constructor(props) {
+                  super(props);
+                  this.state = { count: 0, isOnline: null };
+                  this.handleStatusChange = this.handleStatusChange.bind(this);
+                }
+
+                // Has access to React Lifecycle Methods
+                componentDidMount() {
+                  document.title = `You clicked ${this.state.count} times`;
+                  ChatAPI.subscribeToFriendStatus(
+                    this.props.friend.id,
+                    this.handleStatusChange
+                  );
+                }
+
+                componentDidUpdate() {
+                  document.title = `You clicked ${this.state.count} times`;
+                }
+
+                componentWillUnmount() {
+                  ChatAPI.unsubscribeFromFriendStatus(
+                    this.props.friend.id,
+                    this.handleStatusChange
+                  );
+                }
+
+                handleStatusChange(status) {
+                  this.setState({
+                    isOnline: status.isOnline
+                  });
+                }
+
+                ...
+              }
+            </code></pre>
+          </section>
+
+          <!-- Subslide 3.4 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Problems 🤯</h2>
+            <h2 style="font-size: 3.5rem; text-transform: none; color: #61DAFB; margin: 0;">
+              It’s hard to reuse stateful logic between components</h2>
+          </section>
+
+          <!-- Subslide 3.4b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Problems 🤯</h2>
+            <h2 style="font-size: 3.5rem; text-transform: none; color: #61DAFB; margin: 0;">
+              It’s hard to reuse stateful logic between components</h2>
+            <pre><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              import React, { Component } from 'react';
+
+              class FriendStatusWithCounter extends Component {
+                // Has state
+                constructor(props) {
+                  super(props);
+                  this.state = { count: 0, isOnline: null };
+                  this.handleStatusChange = this.handleStatusChange.bind(this);
+                }
+
+                // Has access to React Lifecycle Methods
+                componentDidMount() {
+                  document.title = `You clicked ${this.state.count} times`;
+                  ChatAPI.subscribeToFriendStatus(
+                    this.props.friend.id,
+                    this.handleStatusChange
+                  );
+                }
+
+                componentDidUpdate() {
+                  document.title = `You clicked ${this.state.count} times`;
+                }
+
+                componentWillUnmount() {
+                  ChatAPI.unsubscribeFromFriendStatus(
+                    this.props.friend.id,
+                    this.handleStatusChange
+                  );
+                }
+
+                handleStatusChange(status) {
+                  this.setState({
+                    isOnline: status.isOnline
+                  });
+                }
+
+                ...
+              }
+            </code></pre>
+          </section>
+        </section>
+
+        <!-- Slide 4 - Rect Hooks -->
+        <section>
+          <!-- Subslide 4.1 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <p style="font-size: 1.5rem; margin: 0 3px;">Introducing:</p>
+            <h2 style="color: #61DAFB;">React Hooks ⚛️</h2>
+          </section>
+
+          <!-- Subslide 4.2 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="color: #61DAFB;">React Hooks ⚛️</h2>
+            Introduced in React 16.8, React Hooks is a set of function which allows
+            developers to "hook into" <u>React state and Lifecycle</u> without having
+            to use Class Component.
+          </section>
+
+          <!-- Subslide 4.4 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #1: <span style="text-transform: none;">useState</span></h2>
+          </section>
+
+          <!-- Subslide 4.4 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #1: <span style="text-transform: none;">useState</span></h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              function Counter({initialCount}) {
+                const [count, setCount] = useState(initialCount);
+                return (
+                  &lt;&gt;
+                    Count: {count}
+                    &lt;button onClick={() => setCount(initialCount)}&gt; Reset &lt;/button&gt;
+                    &lt;button onClick={() => setCount(prevCount => prevCount - 1)}&gt; - &lt;/button&gt;
+                    &lt;button onClick={() => setCount(prevCount => prevCount + 1)}&gt; + &lt;/button&gt;
+                  &lt;/&gt;
+                );
+              }
+            </code></pre>
+          </section>
+
+          <!-- Subslide 4.4c -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #1: <span style="text-transform: none;">useState</span></h2>
+            <div style="display: flex;">
+              <div style="width: 50%;">
+                <ul style="font-size: 2rem;">
+                  <li>Returns a <b>stateful value</b>, and <b>a function</b> to update it.</li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="2"
+                >
+                  function Counter({initialCount}) {
+                    const [count, setCount] = useState(initialCount);
+                    return (
+                      &lt;&gt;
+                        Count: {count}
+                        &lt;button onClick={() => setCount(initialCount)}&gt; Reset &lt;/button&gt;
+                        &lt;button onClick={() => setCount(prevCount => prevCount - 1)}&gt; - &lt;/button&gt;
+                        &lt;button onClick={() => setCount(prevCount => prevCount + 1)}&gt; + &lt;/button&gt;
+                      &lt;/&gt;
+                    );
+                  }
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 4.4d -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #1: <span style="text-transform: none;">useState</span></h2>
+            <div style="display: flex;">
+              <div style="width: 50%;">
+                <ul style="font-size: 2rem;">
+                  <li style="filter: opacity(50%);">Returns a <b>stateful value</b>, and <b>a function</b> to update it.</li>
+                  <li>setState <b>accepts new state</b> and <b>triggers component re-render</b></li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="6"
+                >
+                  function Counter({initialCount}) {
+                    const [count, setCount] = useState(initialCount);
+                    return (
+                      &lt;&gt;
+                        Count: {count}
+                        &lt;button onClick={() => setCount(initialCount)}&gt; Reset &lt;/button&gt;
+                        &lt;button onClick={() => setCount(prevCount => prevCount - 1)}&gt; - &lt;/button&gt;
+                        &lt;button onClick={() => setCount(prevCount => prevCount + 1)}&gt; + &lt;/button&gt;
+                      &lt;/&gt;
+                    );
+                  }
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 4.4e -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #1: <span style="text-transform: none;">useState</span></h2>
+            <div style="display: flex;">
+              <div style="width: 50%;">
+                <ul style="font-size: 2rem;">
+                  <li style="filter: opacity(50%);">Returns a <b>stateful value</b>, and <b>a function</b> to update it.</li>
+                  <li style="filter: opacity(50%);">setState <b>accepts new state</b> and <b>triggers component re-render</b></li>
+                  <li>Use callback on setState as argument when using previous state in computation</li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="7-8"
+                >
+                  function Counter({initialCount}) {
+                    const [count, setCount] = useState(initialCount);
+                    return (
+                      &lt;&gt;
+                        Count: {count}
+                        &lt;button onClick={() => setCount(initialCount)}&gt; Reset &lt;/button&gt;
+                        &lt;button onClick={() => setCount(prevCount => prevCount - 1)}&gt; - &lt;/button&gt;
+                        &lt;button onClick={() => setCount(prevCount => prevCount + 1)}&gt; + &lt;/button&gt;
+                      &lt;/&gt;
+                    );
+                  }
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 4.x -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #2: <span style="text-transform: none;">useEffect</span></h2>
+          </section>
+        </section>
+
+      </div>
+    </div>
+
+    <script src="./reveal.js/dist/reveal.js"></script>
+    <script src="./reveal.js/plugin/notes/notes.js"></script>
+    <script src="./reveal.js/plugin/markdown/markdown.js"></script>
+    <script src="./reveal.js/plugin/highlight/highlight.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+      });
+    </script>
+  </body>
 </html>
