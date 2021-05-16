@@ -119,7 +119,7 @@
             data-auto-animate
           >
             <h2 style="color: #61DAFB; margin: 0;">Problems 🤯</h2>
-            <p style="font-size: 1.5rem; margin: 0 3px;">From using Class Component</p>
+            <p style="font-size: 1.5rem; margin: 0 3px;">Upon using Class Component</p>
           </section>
 
           <!-- Subslide 3.2 -->
@@ -145,46 +145,939 @@
               style="font-size: 0.85rem;"
               data-trim
               data-noescape
-              data-line-numbers
+              data-line-numbers="43-175|186-227"
             >
-              import React, { Component } from 'react';
+              /* eslint-disable array-callback-return */
+              /* eslint-disable consistent-return */
+              import React, { Component } from "react";
+              import PropTypes from "prop-types";
+              import { connect } from "react-redux";
+              import Card from "components/Card";
+              import Section from "../../components/Section";
+              import { Buttons } from "../../components/Buttons";
+              import { push } from "connected-react-router";
 
-              class FriendStatusWithCounter extends Component {
-                // Has state
+              import { EditProfileInterestPageContainer } from "./style";
+              import Spinner from "components/Loading";
+
+              import SearchIcon from "assets/icons/search.svg";
+              import rubbishBin from "assets/icons/rubbish-bin.svg";
+              import likeIcon from "assets/icons/like.svg";
+              import techTopIcon from "assets/icons/tech-top-icon.svg";
+              import nonTechIcon from "assets/icons/non-tech-icon.svg";
+              import entertainmentIcon from "assets/icons/entertainment-icon.svg";
+
+              import {
+                getInterestList,
+                isEditInterestLoading,
+                isEditInterestLoaded,
+                getPostInterestResponse,
+                getDeleteInterestResponse,
+                getPatchInterestResponse
+              } from "selectors/editInterests";
+              import { getUser } from "selectors/user";
+
+              import {
+                fetchUserInterest,
+                postUserInterest,
+                deleteUserInterest,
+                patchUserInterest
+              } from "./actions";
+              import swal from "sweetalert";
+
+              class EditProfileInterestPage extends Component {
                 constructor(props) {
                   super(props);
-                  this.state = { count: 0, isOnline: null };
-                  this.handleStatusChange = this.handleStatusChange.bind(this);
+
+                  this.state = {
+                    techSearchString: "",
+                    nonTechSearchString: "",
+                    entertainmentSearchString: "",
+                    isEditInterestLoading: this.props.isEditInterestLoading,
+                    isTechFocus: false,
+                    isNonTechFocus: false,
+                    isEntertainmentFocus: false,
+                    userInterestList: this.props.userInterestList,
+                    techInterestData: [
+                      "Game Development",
+                      "Competitive Programming",
+                      "Network Security and Operating System",
+                      "Data Science",
+                      "Business Intelligence",
+                      "Web Development",
+                      "Backend Development",
+                      "Frontend Development",
+                      "Mobile Development",
+                      "UI/UX",
+                      "Embedded System",
+                      "Artificial Intelligence",
+                      "Project Management",
+                      "Internet of Things"
+                    ],
+                    nonTechInterestData: [
+                      "Business IT",
+                      "Leadership",
+                      "Social Act",
+                      "Travelling",
+                      "Fashion",
+                      "Automotive",
+                      "Debate",
+                      "Cooking",
+                      "Gardening",
+                      "Puzzle",
+                      "History",
+                      "Astronomy",
+                      "Music",
+                      "Band",
+                      "Vocal",
+                      "Dance",
+                      "Theater",
+                      "Drawing",
+                      "Painting",
+                      "Crafting",
+                      "Graphic Design",
+                      "Literature",
+                      "Writing",
+                      "Photography",
+                      "Videography",
+                      "Football",
+                      "Basketball",
+                      "Volleyball",
+                      "Softball",
+                      "Cricket",
+                      "Floorball",
+                      "Golf",
+                      "Bowling",
+                      "Badminton",
+                      "Tennis",
+                      "Table Tennis",
+                      "Martial Art",
+                      "Pencak Silat",
+                      "Taekwondo",
+                      "Boxing",
+                      "Karate",
+                      "Javelin",
+                      "Archery",
+                      "Darts",
+                      "Chess",
+                      "Bridge",
+                      "Athletic",
+                      "Gym",
+                      "Swimming",
+                      "Running",
+                      "Cycling",
+                      "Equestrian",
+                      "Ice Skating",
+                      "Hiking",
+                      "Diving",
+                      "Surfing",
+                      "Jogging",
+                      "Yoga"
+                    ],
+                    entertainmentInterestData: [
+                      "Rock",
+                      "Jazz",
+                      "Classic",
+                      "Pop",
+                      "R&B",
+                      "Hip hop",
+                      "Electric",
+                      "Alternative",
+                      "K-Pop",
+                      "J-Pop",
+                      "Indie",
+                      "Netflix",
+                      "Anime",
+                      "Thriller",
+                      "Action",
+                      "Science Fiction",
+                      "Comedy",
+                      "Romance",
+                      "Superheroes",
+                      "Star Wars",
+                      "Lord of The Rings",
+                      "Game of Thrones",
+                      "Harry Potter",
+                      "DotA 2",
+                      "Pokemon",
+                      "Counter Strike",
+                      "League of Legends",
+                      "Osu",
+                      "GTA",
+                      "Minecraft",
+                      "Visual Novel",
+                      "FPS Game",
+                      "Rhytm Game",
+                      "PUBG",
+                      "Mobile Legend",
+                      "Clash Royale",
+                      "Clash of Clans",
+                      "Brawl Stars",
+                      "Marvel",
+                      "DC Comics",
+                      "Novel",
+                      "Comics"
+                    ],
+                    techSearchData: "",
+                    nonTechSearchData: "",
+                    entertainmentSearchData: ""
+                  };
+
+                  this.handleSearch = this.handleSearch.bind(this);
+                  this.handleClick = this.handleClick.bind(this);
+                  this.handleFocus = this.handleFocus.bind(this);
+                  this.handleBlur = this.handleBlur.bind(this);
+                  this.handleDelete = this.handleDelete.bind(this);
+                  this.renderSearchList = this.renderSearchList.bind(this);
+                  this.handleMoveTop = this.handleMoveTop.bind(this);
                 }
 
-                // Has access to React Lifecycle Methods
                 componentDidMount() {
-                  document.title = `You clicked ${this.state.count} times`;
-                  ChatAPI.subscribeToFriendStatus(
-                    this.props.friend.id,
-                    this.handleStatusChange
-                  );
+                  const userId = this.props.user.user_id;
+
+                  this.props.fetchGroups();
+                  this.props.fetchProfile(userId);
+                  this.props.fetchUserInterest(userId);
                 }
 
-                componentDidUpdate() {
-                  document.title = `You clicked ${this.state.count} times`;
+                componentDidUpdate(prevProps) {
+                  if (prevProps !== this.props) {
+                    if (prevProps.userInterestList !== this.props.userInterestList) {
+                      this.setState({ userInterestList: this.props.userInterestList });
+                    }
+                    if (
+                      prevProps.isEditInterestLoading !== this.props.isEditInterestLoading
+                    ) {
+                      this.setState({
+                        isEditInterestLoading: this.props.isEditInterestLoading
+                      });
+                    }
+                    if (prevProps.postInterestResponse !== this.props.postInterestResponse) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                    if (
+                      prevProps.isEditInterestLoading !== this.props.isEditInterestLoading
+                    ) {
+                      this.setState({
+                        isEditInterestLoading: this.props.isEditInterestLoading
+                      });
+                    }
+                    if (
+                      prevProps.deleteInterestResponse !== this.props.deleteInterestResponse
+                    ) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                    if (
+                      prevProps.patchInterestResponse !== this.props.patchInterestResponse
+                    ) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                  }
                 }
 
-                componentWillUnmount() {
-                  ChatAPI.unsubscribeFromFriendStatus(
-                    this.props.friend.id,
-                    this.handleStatusChange
-                  );
+                handleSearch(event) {
+                  const whichCategory = event.currentTarget.id;
+                  const searchedString = event.target.value;
+                  let filteredData = "";
+
+                  switch (whichCategory.toLowerCase()) {
+                    case "technology":
+                      filteredData = this.filterArrayData(searchedString, "technology");
+
+                      this.renderSearchList(filteredData, "Technology");
+                      this.setState({ techSearchString: searchedString });
+
+                      break;
+                    case "non-tech":
+                      filteredData = this.filterArrayData(searchedString, "non-tech");
+
+                      this.renderSearchList(filteredData, "Non-Tech");
+                      this.setState({ nonTechSearchString: searchedString });
+
+                      break;
+                    case "entertainment":
+                      filteredData = this.filterArrayData(searchedString, "entertainment");
+
+                      this.renderSearchList(filteredData, "Entertainment");
+                      this.setState({ entertainmentSearchString: searchedString });
+
+                      break;
+                    default:
+                      console.log("search switch case err", whichCategory);
+                  }
                 }
 
-                handleStatusChange(status) {
+                filterArrayData(searchedString, whichCategory) {
+                  let filteredData = "";
+                  let techInterestData = "";
+                  let nonTechInterestData = "";
+                  let entertainmentInterestData = "";
+
+                  switch (whichCategory.toLowerCase()) {
+                    case "technology":
+                      techInterestData = this.state.techInterestData;
+                      filteredData = techInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    case "non-tech":
+                      nonTechInterestData = this.state.nonTechInterestData;
+                      filteredData = nonTechInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    case "entertainment":
+                      entertainmentInterestData = this.state.entertainmentInterestData;
+                      filteredData = entertainmentInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    default:
+                      console.log("error filter array data", whichCategory);
+
+                      break;
+                  }
+
+                  return null;
+                }
+
+                handleClick(event) {
+                  let userInterestList = this.state.userInterestList;
+
+                  let techInterestCount = 0;
+                  let nonTechInterestCount = 0;
+                  let entertainmentInterestCount = 0;
+
+                  const selectedInterest = event.currentTarget.id;
+                  const selectedCategory = event.currentTarget.className.split(" ")[1];
+
+                  userInterestList.map(interest => {
+                    const whichCategory = interest.interest_category;
+                    if (
+                      interest.interest_name.toLowerCase() === selectedInterest.toLowerCase()
+                    ) {
+                      userInterestList = null;
+
+                      return userInterestList;
+                    }
+
+                    switch (whichCategory) {
+                      case "Technology":
+                        return (techInterestCount += 1);
+
+                      case "Non-Tech":
+                        return (nonTechInterestCount += 1);
+
+                      case "Entertainment":
+                        return (entertainmentInterestCount += 1);
+
+                      default:
+                        console.log("error count interest", whichCategory);
+                    }
+                  });
+
+                  switch (selectedCategory) {
+                    case "Technology":
+                      if (techInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    case "Non-Tech":
+                      if (nonTechInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    case "Entertainment":
+                      if (entertainmentInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    default:
+                      console.log("error count interest", selectedCategory);
+                  }
+
+                  if (userInterestList === null) {
+                    swal("You already have the same interest", "", "error");
+
+                    return null;
+                  }
+
+                  const payload = {
+                    interest_name: this.titleCase(selectedInterest),
+                    interest_category: selectedCategory
+                  };
+
+                  this.props.postUserInterest(payload);
+
+                  return null;
+                }
+
+                handleFocus(event) {
+                  // do something
+                  const whichInterest = event.currentTarget.id;
+                  let searchedString = "";
+                  let filteredData = [];
+                  switch (whichInterest.toLowerCase()) {
+                    case "technology":
+                      searchedString = this.state.techSearchString;
+                      filteredData = this.filterArrayData(searchedString, "technology");
+                      this.renderSearchList(filteredData, "Technology");
+
+                      this.setState({
+                        isTechFocus: true
+                      });
+                      break;
+                    case "non-tech":
+                      searchedString = this.state.nonTechSearchString;
+                      filteredData = this.filterArrayData(searchedString, "non-tech");
+                      this.renderSearchList(filteredData, "Non-Tech");
+
+                      this.setState({
+                        isNonTechFocus: true
+                      });
+                      break;
+                    case "entertainment":
+                      searchedString = this.state.entertainmentSearchString;
+                      filteredData = this.filterArrayData(searchedString, "entertainment");
+                      this.renderSearchList(filteredData, "Entertainment");
+
+                      this.setState({
+                        isEntertainmentFocus: true
+                      });
+                      break;
+                    default:
+                      console.log("current target error->", whichInterest);
+                  }
+                }
+
+                handleBlur() {
+                  // timeout so onClick registered first
+                  if (this.state.isTechFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isTechFocus: false
+                      });
+                    }, 150);
+                  } else if (this.state.isNonTechFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isNonTechFocus: false
+                      });
+                    }, 150);
+                  } else if (this.state.isEntertainmentFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isEntertainmentFocus: false
+                      });
+                    }, 150);
+                  }
+                }
+
+                handleDelete(event) {
+                  const interestId = event.currentTarget.id;
+                  this.props.deleteUserInterest(interestId);
+                }
+
+                renderSearchList(searchArr, whichCategory) {
+                  const techSearchList = [];
+                  const nonTechSearchList = [];
+                  const entertainmentSearchList = [];
+                  const { userInterestList } = this.state;
+
+                  searchArr.map(data => {
+                    let isValid = true;
+
+                    // filter uwhichSectionser chosen interest from interest list
+                    userInterestList.map(interest => {
+                      if (interest.interest_name === data) {
+                        // redundant
+                        isValid = false;
+                      }
+                    });
+                    if (isValid) {
+                      switch (whichCategory) {
+                        case "Technology":
+                          techSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        case "Non-Tech":
+                          nonTechSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        case "Entertainment":
+                          entertainmentSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        default:
+                          console.log("switch case error", whichCategory);
+                      }
+                    }
+                  });
+
                   this.setState({
-                    isOnline: status.isOnline
+                    techSearchData: techSearchList,
+                    nonTechSearchData: nonTechSearchList,
+                    entertainmentSearchData: entertainmentSearchList
                   });
                 }
 
-                ...
+                handleMoveTop(event) {
+                  const selectedId = event.currentTarget.id;
+                  this.props.patchUserInterest(selectedId);
+                }
+
+                titleCase(str) {
+                  return str
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.replace(word[0], word[0].toUpperCase()))
+                    .join(" ");
+                }
+
+                render() {
+                  const {
+                    userInterestList,
+                    isTechFocus,
+                    techSearchData,
+                    // eslint-disable-next-line no-shadow
+                    isEditInterestLoading,
+                    isNonTechFocus,
+                    nonTechSearchData,
+                    isEntertainmentFocus,
+                    entertainmentSearchData
+                  } = this.state;
+
+                  const renderEmptyList = (
+                    &lt;div className="empty-interest">
+                      &lt;p>You Have No Interest in This Category&lt;/p>
+                    &lt;/div>
+                  );
+
+                  const renderUserTechInterestList = [];
+                  const renderUserNonTechInterestList = [];
+                  const renderUserEntertainmentInterestList = [];
+
+                  if (userInterestList) {
+                    userInterestList.map(data => {
+                      const isFirst = data.is_top_interest;
+                      if (data.interest_category === "Technology") {
+                        if (isFirst) {
+                          renderUserTechInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={techTopIcon}
+                                  alt="top tech icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserTechInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      } else if (data.interest_category === "Non-Tech") {
+                        if (isFirst) {
+                          renderUserNonTechInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={nonTechIcon}
+                                  alt="top non tech icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserNonTechInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      } else if (data.interest_category === "Entertainment") {
+                        if (isFirst) {
+                          renderUserEntertainmentInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={entertainmentIcon}
+                                  alt="top entertainment icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserEntertainmentInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      }
+
+                      return null;
+                    });
+                  }
+
+                  return (
+                    &lt;EditProfileInterestPageContainer>
+                      &lt;Section title="Edit Interest">
+                        &lt;div className="technology-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Technology&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="technology"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.techSearchString}
+                                  placeholder="Input your interest (ex: Web Development)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="tech-interest-data">
+                                &lt;div className="search-options">
+                                  {isTechFocus && (
+                                    &lt;ul className="search-result">{techSearchData}&lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserTechInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserTechInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div className="non-tech-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Non-Technology&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="non-tech"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.nonTechSearchString}
+                                  placeholder="Input your interest (ex: Photography)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="non-tech-interest-data">
+                                &lt;div className="search-options">
+                                  {isNonTechFocus && (
+                                    &lt;ul className="search-result">{nonTechSearchData}&lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserNonTechInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserNonTechInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div className="entertainment-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Entertainment&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="entertainment"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.entertainmentSearchString}
+                                  placeholder="Input your interest (ex: Pokemon)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="entertainment-interest-data">
+                                &lt;div className="search-options">
+                                  {isEntertainmentFocus && (
+                                    &lt;ul className="search-result">
+                                      {entertainmentSearchData}
+                                    &lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserEntertainmentInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserEntertainmentInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div
+                          className="back-button-wrap"
+                          onClick={() => this.props.push("/profile")}
+                        >
+                          &lt;Buttons name="OK" wide="6rem" />
+                        &lt;/div>
+                      &lt;/Section>
+                    &lt;/EditProfileInterestPageContainer>
+                  );
+                }
               }
+
+              EditProfileInterestPage.propTypes = {
+                push: PropTypes.func.isRequired,
+                isEditInterestLoading: PropTypes.bool.isRequired,
+                isEditInterestLoaded: PropTypes.bool.isRequired,
+                userInterestList: PropTypes.shape().isRequired,
+                fetchUserInterest: PropTypes.func.isRequired,
+                user: PropTypes.func.isRequired,
+                postUserInterest: PropTypes.func.isRequired,
+                deleteUserInterest: PropTypes.func.isRequired,
+                patchUserInterest: PropTypes.func.isRequired,
+                postInterestResponse: PropTypes.object.isRequired,
+                deleteInterestResponse: PropTypes.object.isRequired,
+                patchInterestResponse: PropTypes.object.isRequired
+              };
+
+              function mapStateToProps(state) {
+                return {
+                  isEditInterestLoading: isEditInterestLoading(state),
+                  isEditInterestLoaded: isEditInterestLoaded(state),
+                  userInterestList: getInterestList(state),
+                  user: getUser(state),
+                  postInterestResponse: getPostInterestResponse(state),
+                  deleteInterestResponse: getDeleteInterestResponse(state),
+                  patchInterestResponse: getPatchInterestResponse(state)
+                };
+              }
+
+              function mapDispatchToProps(dispatch) {
+                return {
+                  fetchUserInterest: id => dispatch(fetchUserInterest(id)),
+                  postUserInterest: payload => dispatch(postUserInterest(payload)),
+                  deleteUserInterest: id => dispatch(deleteUserInterest(id)),
+                  push: url => dispatch(push(url)),
+                  patchUserInterest: id => dispatch(patchUserInterest(id))
+                };
+              }
+
+              export default connect(
+                mapStateToProps,
+                mapDispatchToProps
+              )(EditProfileInterestPage);
             </code></pre>
           </section>
 
@@ -211,46 +1104,937 @@
               style="font-size: 0.85rem;"
               data-trim
               data-noescape
-              data-line-numbers
+              data-line-numbers="177-183"
             >
-              import React, { Component } from 'react';
+              /* eslint-disable array-callback-return */
+              /* eslint-disable consistent-return */
+              import React, { Component } from "react";
+              import PropTypes from "prop-types";
+              import { connect } from "react-redux";
+              import Card from "components/Card";
+              import Section from "../../components/Section";
+              import { Buttons } from "../../components/Buttons";
+              import { push } from "connected-react-router";
 
-              class FriendStatusWithCounter extends Component {
-                // Has state
+              import { EditProfileInterestPageContainer } from "./style";
+              import Spinner from "components/Loading";
+
+              import SearchIcon from "assets/icons/search.svg";
+              import rubbishBin from "assets/icons/rubbish-bin.svg";
+              import likeIcon from "assets/icons/like.svg";
+              import techTopIcon from "assets/icons/tech-top-icon.svg";
+              import nonTechIcon from "assets/icons/non-tech-icon.svg";
+              import entertainmentIcon from "assets/icons/entertainment-icon.svg";
+
+              import {
+                getInterestList,
+                isEditInterestLoading,
+                isEditInterestLoaded,
+                getPostInterestResponse,
+                getDeleteInterestResponse,
+                getPatchInterestResponse
+              } from "selectors/editInterests";
+              import { getUser } from "selectors/user";
+
+              import {
+                fetchUserInterest,
+                postUserInterest,
+                deleteUserInterest,
+                patchUserInterest
+              } from "./actions";
+              import swal from "sweetalert";
+
+              class EditProfileInterestPage extends Component {
                 constructor(props) {
                   super(props);
-                  this.state = { count: 0, isOnline: null };
-                  this.handleStatusChange = this.handleStatusChange.bind(this);
+
+                  this.state = {
+                    techSearchString: "",
+                    nonTechSearchString: "",
+                    entertainmentSearchString: "",
+                    isEditInterestLoading: this.props.isEditInterestLoading,
+                    isTechFocus: false,
+                    isNonTechFocus: false,
+                    isEntertainmentFocus: false,
+                    userInterestList: this.props.userInterestList,
+                    techInterestData: [
+                      "Game Development",
+                      "Competitive Programming",
+                      "Network Security and Operating System",
+                      "Data Science",
+                      "Business Intelligence",
+                      "Web Development",
+                      "Backend Development",
+                      "Frontend Development",
+                      "Mobile Development",
+                      "UI/UX",
+                      "Embedded System",
+                      "Artificial Intelligence",
+                      "Project Management",
+                      "Internet of Things"
+                    ],
+                    nonTechInterestData: [
+                      "Business IT",
+                      "Leadership",
+                      "Social Act",
+                      "Travelling",
+                      "Fashion",
+                      "Automotive",
+                      "Debate",
+                      "Cooking",
+                      "Gardening",
+                      "Puzzle",
+                      "History",
+                      "Astronomy",
+                      "Music",
+                      "Band",
+                      "Vocal",
+                      "Dance",
+                      "Theater",
+                      "Drawing",
+                      "Painting",
+                      "Crafting",
+                      "Graphic Design",
+                      "Literature",
+                      "Writing",
+                      "Photography",
+                      "Videography",
+                      "Football",
+                      "Basketball",
+                      "Volleyball",
+                      "Softball",
+                      "Cricket",
+                      "Floorball",
+                      "Golf",
+                      "Bowling",
+                      "Badminton",
+                      "Tennis",
+                      "Table Tennis",
+                      "Martial Art",
+                      "Pencak Silat",
+                      "Taekwondo",
+                      "Boxing",
+                      "Karate",
+                      "Javelin",
+                      "Archery",
+                      "Darts",
+                      "Chess",
+                      "Bridge",
+                      "Athletic",
+                      "Gym",
+                      "Swimming",
+                      "Running",
+                      "Cycling",
+                      "Equestrian",
+                      "Ice Skating",
+                      "Hiking",
+                      "Diving",
+                      "Surfing",
+                      "Jogging",
+                      "Yoga"
+                    ],
+                    entertainmentInterestData: [
+                      "Rock",
+                      "Jazz",
+                      "Classic",
+                      "Pop",
+                      "R&B",
+                      "Hip hop",
+                      "Electric",
+                      "Alternative",
+                      "K-Pop",
+                      "J-Pop",
+                      "Indie",
+                      "Netflix",
+                      "Anime",
+                      "Thriller",
+                      "Action",
+                      "Science Fiction",
+                      "Comedy",
+                      "Romance",
+                      "Superheroes",
+                      "Star Wars",
+                      "Lord of The Rings",
+                      "Game of Thrones",
+                      "Harry Potter",
+                      "DotA 2",
+                      "Pokemon",
+                      "Counter Strike",
+                      "League of Legends",
+                      "Osu",
+                      "GTA",
+                      "Minecraft",
+                      "Visual Novel",
+                      "FPS Game",
+                      "Rhytm Game",
+                      "PUBG",
+                      "Mobile Legend",
+                      "Clash Royale",
+                      "Clash of Clans",
+                      "Brawl Stars",
+                      "Marvel",
+                      "DC Comics",
+                      "Novel",
+                      "Comics"
+                    ],
+                    techSearchData: "",
+                    nonTechSearchData: "",
+                    entertainmentSearchData: ""
+                  };
+
+                  this.handleSearch = this.handleSearch.bind(this);
+                  this.handleClick = this.handleClick.bind(this);
+                  this.handleFocus = this.handleFocus.bind(this);
+                  this.handleBlur = this.handleBlur.bind(this);
+                  this.handleDelete = this.handleDelete.bind(this);
+                  this.renderSearchList = this.renderSearchList.bind(this);
+                  this.handleMoveTop = this.handleMoveTop.bind(this);
                 }
 
-                // Has access to React Lifecycle Methods
                 componentDidMount() {
-                  document.title = `You clicked ${this.state.count} times`;
-                  ChatAPI.subscribeToFriendStatus(
-                    this.props.friend.id,
-                    this.handleStatusChange
-                  );
+                  const userId = this.props.user.user_id;
+
+                  this.props.fetchUserInterest(userId);
                 }
 
-                componentDidUpdate() {
-                  document.title = `You clicked ${this.state.count} times`;
+                componentDidUpdate(prevProps) {
+                  if (prevProps !== this.props) {
+                    if (prevProps.userInterestList !== this.props.userInterestList) {
+                      this.setState({ userInterestList: this.props.userInterestList });
+                    }
+                    if (
+                      prevProps.isEditInterestLoading !== this.props.isEditInterestLoading
+                    ) {
+                      this.setState({
+                        isEditInterestLoading: this.props.isEditInterestLoading
+                      });
+                    }
+                    if (prevProps.postInterestResponse !== this.props.postInterestResponse) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                    if (
+                      prevProps.isEditInterestLoading !== this.props.isEditInterestLoading
+                    ) {
+                      this.setState({
+                        isEditInterestLoading: this.props.isEditInterestLoading
+                      });
+                    }
+                    if (
+                      prevProps.deleteInterestResponse !== this.props.deleteInterestResponse
+                    ) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                    if (
+                      prevProps.patchInterestResponse !== this.props.patchInterestResponse
+                    ) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                  }
                 }
 
-                componentWillUnmount() {
-                  ChatAPI.unsubscribeFromFriendStatus(
-                    this.props.friend.id,
-                    this.handleStatusChange
-                  );
+                handleSearch(event) {
+                  const whichCategory = event.currentTarget.id;
+                  const searchedString = event.target.value;
+                  let filteredData = "";
+
+                  switch (whichCategory.toLowerCase()) {
+                    case "technology":
+                      filteredData = this.filterArrayData(searchedString, "technology");
+
+                      this.renderSearchList(filteredData, "Technology");
+                      this.setState({ techSearchString: searchedString });
+
+                      break;
+                    case "non-tech":
+                      filteredData = this.filterArrayData(searchedString, "non-tech");
+
+                      this.renderSearchList(filteredData, "Non-Tech");
+                      this.setState({ nonTechSearchString: searchedString });
+
+                      break;
+                    case "entertainment":
+                      filteredData = this.filterArrayData(searchedString, "entertainment");
+
+                      this.renderSearchList(filteredData, "Entertainment");
+                      this.setState({ entertainmentSearchString: searchedString });
+
+                      break;
+                    default:
+                      console.log("search switch case err", whichCategory);
+                  }
                 }
 
-                handleStatusChange(status) {
+                filterArrayData(searchedString, whichCategory) {
+                  let filteredData = "";
+                  let techInterestData = "";
+                  let nonTechInterestData = "";
+                  let entertainmentInterestData = "";
+
+                  switch (whichCategory.toLowerCase()) {
+                    case "technology":
+                      techInterestData = this.state.techInterestData;
+                      filteredData = techInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    case "non-tech":
+                      nonTechInterestData = this.state.nonTechInterestData;
+                      filteredData = nonTechInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    case "entertainment":
+                      entertainmentInterestData = this.state.entertainmentInterestData;
+                      filteredData = entertainmentInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    default:
+                      console.log("error filter array data", whichCategory);
+
+                      break;
+                  }
+
+                  return null;
+                }
+
+                handleClick(event) {
+                  let userInterestList = this.state.userInterestList;
+
+                  let techInterestCount = 0;
+                  let nonTechInterestCount = 0;
+                  let entertainmentInterestCount = 0;
+
+                  const selectedInterest = event.currentTarget.id;
+                  const selectedCategory = event.currentTarget.className.split(" ")[1];
+
+                  userInterestList.map(interest => {
+                    const whichCategory = interest.interest_category;
+                    if (
+                      interest.interest_name.toLowerCase() === selectedInterest.toLowerCase()
+                    ) {
+                      userInterestList = null;
+
+                      return userInterestList;
+                    }
+
+                    switch (whichCategory) {
+                      case "Technology":
+                        return (techInterestCount += 1);
+
+                      case "Non-Tech":
+                        return (nonTechInterestCount += 1);
+
+                      case "Entertainment":
+                        return (entertainmentInterestCount += 1);
+
+                      default:
+                        console.log("error count interest", whichCategory);
+                    }
+                  });
+
+                  switch (selectedCategory) {
+                    case "Technology":
+                      if (techInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    case "Non-Tech":
+                      if (nonTechInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    case "Entertainment":
+                      if (entertainmentInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    default:
+                      console.log("error count interest", selectedCategory);
+                  }
+
+                  if (userInterestList === null) {
+                    swal("You already have the same interest", "", "error");
+
+                    return null;
+                  }
+
+                  const payload = {
+                    interest_name: this.titleCase(selectedInterest),
+                    interest_category: selectedCategory
+                  };
+
+                  this.props.postUserInterest(payload);
+
+                  return null;
+                }
+
+                handleFocus(event) {
+                  // do something
+                  const whichInterest = event.currentTarget.id;
+                  let searchedString = "";
+                  let filteredData = [];
+                  switch (whichInterest.toLowerCase()) {
+                    case "technology":
+                      searchedString = this.state.techSearchString;
+                      filteredData = this.filterArrayData(searchedString, "technology");
+                      this.renderSearchList(filteredData, "Technology");
+
+                      this.setState({
+                        isTechFocus: true
+                      });
+                      break;
+                    case "non-tech":
+                      searchedString = this.state.nonTechSearchString;
+                      filteredData = this.filterArrayData(searchedString, "non-tech");
+                      this.renderSearchList(filteredData, "Non-Tech");
+
+                      this.setState({
+                        isNonTechFocus: true
+                      });
+                      break;
+                    case "entertainment":
+                      searchedString = this.state.entertainmentSearchString;
+                      filteredData = this.filterArrayData(searchedString, "entertainment");
+                      this.renderSearchList(filteredData, "Entertainment");
+
+                      this.setState({
+                        isEntertainmentFocus: true
+                      });
+                      break;
+                    default:
+                      console.log("current target error->", whichInterest);
+                  }
+                }
+
+                handleBlur() {
+                  // timeout so onClick registered first
+                  if (this.state.isTechFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isTechFocus: false
+                      });
+                    }, 150);
+                  } else if (this.state.isNonTechFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isNonTechFocus: false
+                      });
+                    }, 150);
+                  } else if (this.state.isEntertainmentFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isEntertainmentFocus: false
+                      });
+                    }, 150);
+                  }
+                }
+
+                handleDelete(event) {
+                  const interestId = event.currentTarget.id;
+                  this.props.deleteUserInterest(interestId);
+                }
+
+                renderSearchList(searchArr, whichCategory) {
+                  const techSearchList = [];
+                  const nonTechSearchList = [];
+                  const entertainmentSearchList = [];
+                  const { userInterestList } = this.state;
+
+                  searchArr.map(data => {
+                    let isValid = true;
+
+                    // filter uwhichSectionser chosen interest from interest list
+                    userInterestList.map(interest => {
+                      if (interest.interest_name === data) {
+                        // redundant
+                        isValid = false;
+                      }
+                    });
+                    if (isValid) {
+                      switch (whichCategory) {
+                        case "Technology":
+                          techSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        case "Non-Tech":
+                          nonTechSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        case "Entertainment":
+                          entertainmentSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        default:
+                          console.log("switch case error", whichCategory);
+                      }
+                    }
+                  });
+
                   this.setState({
-                    isOnline: status.isOnline
+                    techSearchData: techSearchList,
+                    nonTechSearchData: nonTechSearchList,
+                    entertainmentSearchData: entertainmentSearchList
                   });
                 }
 
-                ...
+                handleMoveTop(event) {
+                  const selectedId = event.currentTarget.id;
+                  this.props.patchUserInterest(selectedId);
+                }
+
+                titleCase(str) {
+                  return str
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.replace(word[0], word[0].toUpperCase()))
+                    .join(" ");
+                }
+
+                render() {
+                  const {
+                    userInterestList,
+                    isTechFocus,
+                    techSearchData,
+                    // eslint-disable-next-line no-shadow
+                    isEditInterestLoading,
+                    isNonTechFocus,
+                    nonTechSearchData,
+                    isEntertainmentFocus,
+                    entertainmentSearchData
+                  } = this.state;
+
+                  const renderEmptyList = (
+                    &lt;div className="empty-interest">
+                      &lt;p>You Have No Interest in This Category&lt;/p>
+                    &lt;/div>
+                  );
+
+                  const renderUserTechInterestList = [];
+                  const renderUserNonTechInterestList = [];
+                  const renderUserEntertainmentInterestList = [];
+
+                  if (userInterestList) {
+                    userInterestList.map(data => {
+                      const isFirst = data.is_top_interest;
+                      if (data.interest_category === "Technology") {
+                        if (isFirst) {
+                          renderUserTechInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={techTopIcon}
+                                  alt="top tech icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserTechInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      } else if (data.interest_category === "Non-Tech") {
+                        if (isFirst) {
+                          renderUserNonTechInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={nonTechIcon}
+                                  alt="top non tech icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserNonTechInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      } else if (data.interest_category === "Entertainment") {
+                        if (isFirst) {
+                          renderUserEntertainmentInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={entertainmentIcon}
+                                  alt="top entertainment icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserEntertainmentInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      }
+
+                      return null;
+                    });
+                  }
+
+                  return (
+                    &lt;EditProfileInterestPageContainer>
+                      &lt;Section title="Edit Interest">
+                        &lt;div className="technology-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Technology&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="technology"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.techSearchString}
+                                  placeholder="Input your interest (ex: Web Development)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="tech-interest-data">
+                                &lt;div className="search-options">
+                                  {isTechFocus && (
+                                    &lt;ul className="search-result">{techSearchData}&lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserTechInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserTechInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div className="non-tech-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Non-Technology&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="non-tech"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.nonTechSearchString}
+                                  placeholder="Input your interest (ex: Photography)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="non-tech-interest-data">
+                                &lt;div className="search-options">
+                                  {isNonTechFocus && (
+                                    &lt;ul className="search-result">{nonTechSearchData}&lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserNonTechInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserNonTechInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div className="entertainment-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Entertainment&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="entertainment"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.entertainmentSearchString}
+                                  placeholder="Input your interest (ex: Pokemon)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="entertainment-interest-data">
+                                &lt;div className="search-options">
+                                  {isEntertainmentFocus && (
+                                    &lt;ul className="search-result">
+                                      {entertainmentSearchData}
+                                    &lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserEntertainmentInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserEntertainmentInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div
+                          className="back-button-wrap"
+                          onClick={() => this.props.push("/profile")}
+                        >
+                          &lt;Buttons name="OK" wide="6rem" />
+                        &lt;/div>
+                      &lt;/Section>
+                    &lt;/EditProfileInterestPageContainer>
+                  );
+                }
               }
+
+              EditProfileInterestPage.propTypes = {
+                push: PropTypes.func.isRequired,
+                isEditInterestLoading: PropTypes.bool.isRequired,
+                isEditInterestLoaded: PropTypes.bool.isRequired,
+                userInterestList: PropTypes.shape().isRequired,
+                fetchUserInterest: PropTypes.func.isRequired,
+                user: PropTypes.func.isRequired,
+                postUserInterest: PropTypes.func.isRequired,
+                deleteUserInterest: PropTypes.func.isRequired,
+                patchUserInterest: PropTypes.func.isRequired,
+                postInterestResponse: PropTypes.object.isRequired,
+                deleteInterestResponse: PropTypes.object.isRequired,
+                patchInterestResponse: PropTypes.object.isRequired
+              };
+
+              function mapStateToProps(state) {
+                return {
+                  isEditInterestLoading: isEditInterestLoading(state),
+                  isEditInterestLoaded: isEditInterestLoaded(state),
+                  userInterestList: getInterestList(state),
+                  user: getUser(state),
+                  postInterestResponse: getPostInterestResponse(state),
+                  deleteInterestResponse: getDeleteInterestResponse(state),
+                  patchInterestResponse: getPatchInterestResponse(state)
+                };
+              }
+
+              function mapDispatchToProps(dispatch) {
+                return {
+                  fetchUserInterest: id => dispatch(fetchUserInterest(id)),
+                  postUserInterest: payload => dispatch(postUserInterest(payload)),
+                  deleteUserInterest: id => dispatch(deleteUserInterest(id)),
+                  push: url => dispatch(push(url)),
+                  patchUserInterest: id => dispatch(patchUserInterest(id))
+                };
+              }
+
+              export default connect(
+                mapStateToProps,
+                mapDispatchToProps
+              )(EditProfileInterestPage);
             </code></pre>
           </section>
 
@@ -277,46 +2061,939 @@
               style="font-size: 0.85rem;"
               data-trim
               data-noescape
-              data-line-numbers
+              data-line-numbers="43-546"
             >
-              import React, { Component } from 'react';
+              /* eslint-disable array-callback-return */
+              /* eslint-disable consistent-return */
+              import React, { Component } from "react";
+              import PropTypes from "prop-types";
+              import { connect } from "react-redux";
+              import Card from "components/Card";
+              import Section from "../../components/Section";
+              import { Buttons } from "../../components/Buttons";
+              import { push } from "connected-react-router";
 
-              class FriendStatusWithCounter extends Component {
-                // Has state
+              import { EditProfileInterestPageContainer } from "./style";
+              import Spinner from "components/Loading";
+
+              import SearchIcon from "assets/icons/search.svg";
+              import rubbishBin from "assets/icons/rubbish-bin.svg";
+              import likeIcon from "assets/icons/like.svg";
+              import techTopIcon from "assets/icons/tech-top-icon.svg";
+              import nonTechIcon from "assets/icons/non-tech-icon.svg";
+              import entertainmentIcon from "assets/icons/entertainment-icon.svg";
+
+              import {
+                getInterestList,
+                isEditInterestLoading,
+                isEditInterestLoaded,
+                getPostInterestResponse,
+                getDeleteInterestResponse,
+                getPatchInterestResponse
+              } from "selectors/editInterests";
+              import { getUser } from "selectors/user";
+
+              import {
+                fetchUserInterest,
+                postUserInterest,
+                deleteUserInterest,
+                patchUserInterest
+              } from "./actions";
+              import swal from "sweetalert";
+
+              class EditProfileInterestPage extends Component {
                 constructor(props) {
                   super(props);
-                  this.state = { count: 0, isOnline: null };
-                  this.handleStatusChange = this.handleStatusChange.bind(this);
+
+                  this.state = {
+                    techSearchString: "",
+                    nonTechSearchString: "",
+                    entertainmentSearchString: "",
+                    isEditInterestLoading: this.props.isEditInterestLoading,
+                    isTechFocus: false,
+                    isNonTechFocus: false,
+                    isEntertainmentFocus: false,
+                    userInterestList: this.props.userInterestList,
+                    techInterestData: [
+                      "Game Development",
+                      "Competitive Programming",
+                      "Network Security and Operating System",
+                      "Data Science",
+                      "Business Intelligence",
+                      "Web Development",
+                      "Backend Development",
+                      "Frontend Development",
+                      "Mobile Development",
+                      "UI/UX",
+                      "Embedded System",
+                      "Artificial Intelligence",
+                      "Project Management",
+                      "Internet of Things"
+                    ],
+                    nonTechInterestData: [
+                      "Business IT",
+                      "Leadership",
+                      "Social Act",
+                      "Travelling",
+                      "Fashion",
+                      "Automotive",
+                      "Debate",
+                      "Cooking",
+                      "Gardening",
+                      "Puzzle",
+                      "History",
+                      "Astronomy",
+                      "Music",
+                      "Band",
+                      "Vocal",
+                      "Dance",
+                      "Theater",
+                      "Drawing",
+                      "Painting",
+                      "Crafting",
+                      "Graphic Design",
+                      "Literature",
+                      "Writing",
+                      "Photography",
+                      "Videography",
+                      "Football",
+                      "Basketball",
+                      "Volleyball",
+                      "Softball",
+                      "Cricket",
+                      "Floorball",
+                      "Golf",
+                      "Bowling",
+                      "Badminton",
+                      "Tennis",
+                      "Table Tennis",
+                      "Martial Art",
+                      "Pencak Silat",
+                      "Taekwondo",
+                      "Boxing",
+                      "Karate",
+                      "Javelin",
+                      "Archery",
+                      "Darts",
+                      "Chess",
+                      "Bridge",
+                      "Athletic",
+                      "Gym",
+                      "Swimming",
+                      "Running",
+                      "Cycling",
+                      "Equestrian",
+                      "Ice Skating",
+                      "Hiking",
+                      "Diving",
+                      "Surfing",
+                      "Jogging",
+                      "Yoga"
+                    ],
+                    entertainmentInterestData: [
+                      "Rock",
+                      "Jazz",
+                      "Classic",
+                      "Pop",
+                      "R&B",
+                      "Hip hop",
+                      "Electric",
+                      "Alternative",
+                      "K-Pop",
+                      "J-Pop",
+                      "Indie",
+                      "Netflix",
+                      "Anime",
+                      "Thriller",
+                      "Action",
+                      "Science Fiction",
+                      "Comedy",
+                      "Romance",
+                      "Superheroes",
+                      "Star Wars",
+                      "Lord of The Rings",
+                      "Game of Thrones",
+                      "Harry Potter",
+                      "DotA 2",
+                      "Pokemon",
+                      "Counter Strike",
+                      "League of Legends",
+                      "Osu",
+                      "GTA",
+                      "Minecraft",
+                      "Visual Novel",
+                      "FPS Game",
+                      "Rhytm Game",
+                      "PUBG",
+                      "Mobile Legend",
+                      "Clash Royale",
+                      "Clash of Clans",
+                      "Brawl Stars",
+                      "Marvel",
+                      "DC Comics",
+                      "Novel",
+                      "Comics"
+                    ],
+                    techSearchData: "",
+                    nonTechSearchData: "",
+                    entertainmentSearchData: ""
+                  };
+
+                  this.handleSearch = this.handleSearch.bind(this);
+                  this.handleClick = this.handleClick.bind(this);
+                  this.handleFocus = this.handleFocus.bind(this);
+                  this.handleBlur = this.handleBlur.bind(this);
+                  this.handleDelete = this.handleDelete.bind(this);
+                  this.renderSearchList = this.renderSearchList.bind(this);
+                  this.handleMoveTop = this.handleMoveTop.bind(this);
                 }
 
-                // Has access to React Lifecycle Methods
                 componentDidMount() {
-                  document.title = `You clicked ${this.state.count} times`;
-                  ChatAPI.subscribeToFriendStatus(
-                    this.props.friend.id,
-                    this.handleStatusChange
-                  );
+                  const userId = this.props.user.user_id;
+
+                  this.props.fetchGroups();
+                  this.props.fetchProfile(userId);
+                  this.props.fetchUserInterest(userId);
                 }
 
-                componentDidUpdate() {
-                  document.title = `You clicked ${this.state.count} times`;
+                componentDidUpdate(prevProps) {
+                  if (prevProps !== this.props) {
+                    if (prevProps.userInterestList !== this.props.userInterestList) {
+                      this.setState({ userInterestList: this.props.userInterestList });
+                    }
+                    if (
+                      prevProps.isEditInterestLoading !== this.props.isEditInterestLoading
+                    ) {
+                      this.setState({
+                        isEditInterestLoading: this.props.isEditInterestLoading
+                      });
+                    }
+                    if (prevProps.postInterestResponse !== this.props.postInterestResponse) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                    if (
+                      prevProps.isEditInterestLoading !== this.props.isEditInterestLoading
+                    ) {
+                      this.setState({
+                        isEditInterestLoading: this.props.isEditInterestLoading
+                      });
+                    }
+                    if (
+                      prevProps.deleteInterestResponse !== this.props.deleteInterestResponse
+                    ) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                    if (
+                      prevProps.patchInterestResponse !== this.props.patchInterestResponse
+                    ) {
+                      this.props.fetchUserInterest(this.props.user.user_id);
+                    }
+                  }
                 }
 
-                componentWillUnmount() {
-                  ChatAPI.unsubscribeFromFriendStatus(
-                    this.props.friend.id,
-                    this.handleStatusChange
-                  );
+                handleSearch(event) {
+                  const whichCategory = event.currentTarget.id;
+                  const searchedString = event.target.value;
+                  let filteredData = "";
+
+                  switch (whichCategory.toLowerCase()) {
+                    case "technology":
+                      filteredData = this.filterArrayData(searchedString, "technology");
+
+                      this.renderSearchList(filteredData, "Technology");
+                      this.setState({ techSearchString: searchedString });
+
+                      break;
+                    case "non-tech":
+                      filteredData = this.filterArrayData(searchedString, "non-tech");
+
+                      this.renderSearchList(filteredData, "Non-Tech");
+                      this.setState({ nonTechSearchString: searchedString });
+
+                      break;
+                    case "entertainment":
+                      filteredData = this.filterArrayData(searchedString, "entertainment");
+
+                      this.renderSearchList(filteredData, "Entertainment");
+                      this.setState({ entertainmentSearchString: searchedString });
+
+                      break;
+                    default:
+                      console.log("search switch case err", whichCategory);
+                  }
                 }
 
-                handleStatusChange(status) {
+                filterArrayData(searchedString, whichCategory) {
+                  let filteredData = "";
+                  let techInterestData = "";
+                  let nonTechInterestData = "";
+                  let entertainmentInterestData = "";
+
+                  switch (whichCategory.toLowerCase()) {
+                    case "technology":
+                      techInterestData = this.state.techInterestData;
+                      filteredData = techInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    case "non-tech":
+                      nonTechInterestData = this.state.nonTechInterestData;
+                      filteredData = nonTechInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    case "entertainment":
+                      entertainmentInterestData = this.state.entertainmentInterestData;
+                      filteredData = entertainmentInterestData.filter(data => {
+                        if (data.toLowerCase().match(new RegExp(searchedString, "gi"))) {
+                          return data;
+                        }
+                      });
+
+                      // add custom filtered data
+                      if (searchedString !== "") {
+                        filteredData.push(searchedString);
+                      }
+
+                      return filteredData;
+                    default:
+                      console.log("error filter array data", whichCategory);
+
+                      break;
+                  }
+
+                  return null;
+                }
+
+                handleClick(event) {
+                  let userInterestList = this.state.userInterestList;
+
+                  let techInterestCount = 0;
+                  let nonTechInterestCount = 0;
+                  let entertainmentInterestCount = 0;
+
+                  const selectedInterest = event.currentTarget.id;
+                  const selectedCategory = event.currentTarget.className.split(" ")[1];
+
+                  userInterestList.map(interest => {
+                    const whichCategory = interest.interest_category;
+                    if (
+                      interest.interest_name.toLowerCase() === selectedInterest.toLowerCase()
+                    ) {
+                      userInterestList = null;
+
+                      return userInterestList;
+                    }
+
+                    switch (whichCategory) {
+                      case "Technology":
+                        return (techInterestCount += 1);
+
+                      case "Non-Tech":
+                        return (nonTechInterestCount += 1);
+
+                      case "Entertainment":
+                        return (entertainmentInterestCount += 1);
+
+                      default:
+                        console.log("error count interest", whichCategory);
+                    }
+                  });
+
+                  switch (selectedCategory) {
+                    case "Technology":
+                      if (techInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    case "Non-Tech":
+                      if (nonTechInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    case "Entertainment":
+                      if (entertainmentInterestCount >= 5) {
+                        return swal(
+                          "Error",
+                          "Cannot add more than 5 interests per category",
+                          "error"
+                        );
+                      }
+                      break;
+                    default:
+                      console.log("error count interest", selectedCategory);
+                  }
+
+                  if (userInterestList === null) {
+                    swal("You already have the same interest", "", "error");
+
+                    return null;
+                  }
+
+                  const payload = {
+                    interest_name: this.titleCase(selectedInterest),
+                    interest_category: selectedCategory
+                  };
+
+                  this.props.postUserInterest(payload);
+
+                  return null;
+                }
+
+                handleFocus(event) {
+                  // do something
+                  const whichInterest = event.currentTarget.id;
+                  let searchedString = "";
+                  let filteredData = [];
+                  switch (whichInterest.toLowerCase()) {
+                    case "technology":
+                      searchedString = this.state.techSearchString;
+                      filteredData = this.filterArrayData(searchedString, "technology");
+                      this.renderSearchList(filteredData, "Technology");
+
+                      this.setState({
+                        isTechFocus: true
+                      });
+                      break;
+                    case "non-tech":
+                      searchedString = this.state.nonTechSearchString;
+                      filteredData = this.filterArrayData(searchedString, "non-tech");
+                      this.renderSearchList(filteredData, "Non-Tech");
+
+                      this.setState({
+                        isNonTechFocus: true
+                      });
+                      break;
+                    case "entertainment":
+                      searchedString = this.state.entertainmentSearchString;
+                      filteredData = this.filterArrayData(searchedString, "entertainment");
+                      this.renderSearchList(filteredData, "Entertainment");
+
+                      this.setState({
+                        isEntertainmentFocus: true
+                      });
+                      break;
+                    default:
+                      console.log("current target error->", whichInterest);
+                  }
+                }
+
+                handleBlur() {
+                  // timeout so onClick registered first
+                  if (this.state.isTechFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isTechFocus: false
+                      });
+                    }, 150);
+                  } else if (this.state.isNonTechFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isNonTechFocus: false
+                      });
+                    }, 150);
+                  } else if (this.state.isEntertainmentFocus) {
+                    setTimeout(() => {
+                      this.setState({
+                        isEntertainmentFocus: false
+                      });
+                    }, 150);
+                  }
+                }
+
+                handleDelete(event) {
+                  const interestId = event.currentTarget.id;
+                  this.props.deleteUserInterest(interestId);
+                }
+
+                renderSearchList(searchArr, whichCategory) {
+                  const techSearchList = [];
+                  const nonTechSearchList = [];
+                  const entertainmentSearchList = [];
+                  const { userInterestList } = this.state;
+
+                  searchArr.map(data => {
+                    let isValid = true;
+
+                    // filter uwhichSectionser chosen interest from interest list
+                    userInterestList.map(interest => {
+                      if (interest.interest_name === data) {
+                        // redundant
+                        isValid = false;
+                      }
+                    });
+                    if (isValid) {
+                      switch (whichCategory) {
+                        case "Technology":
+                          techSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        case "Non-Tech":
+                          nonTechSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        case "Entertainment":
+                          entertainmentSearchList.push(
+                            &lt;li
+                              key={`${whichCategory};${data}`}
+                              className={`search-result-item ${whichCategory}`}
+                              id={data}
+                              onClick={this.handleClick}
+                            >
+                              {data}
+                            &lt;/li>
+                          );
+                          break;
+                        default:
+                          console.log("switch case error", whichCategory);
+                      }
+                    }
+                  });
+
                   this.setState({
-                    isOnline: status.isOnline
+                    techSearchData: techSearchList,
+                    nonTechSearchData: nonTechSearchList,
+                    entertainmentSearchData: entertainmentSearchList
                   });
                 }
 
-                ...
+                handleMoveTop(event) {
+                  const selectedId = event.currentTarget.id;
+                  this.props.patchUserInterest(selectedId);
+                }
+
+                titleCase(str) {
+                  return str
+                    .toLowerCase()
+                    .split(" ")
+                    .map(word => word.replace(word[0], word[0].toUpperCase()))
+                    .join(" ");
+                }
+
+                render() {
+                  const {
+                    userInterestList,
+                    isTechFocus,
+                    techSearchData,
+                    // eslint-disable-next-line no-shadow
+                    isEditInterestLoading,
+                    isNonTechFocus,
+                    nonTechSearchData,
+                    isEntertainmentFocus,
+                    entertainmentSearchData
+                  } = this.state;
+
+                  const renderEmptyList = (
+                    &lt;div className="empty-interest">
+                      &lt;p>You Have No Interest in This Category&lt;/p>
+                    &lt;/div>
+                  );
+
+                  const renderUserTechInterestList = [];
+                  const renderUserNonTechInterestList = [];
+                  const renderUserEntertainmentInterestList = [];
+
+                  if (userInterestList) {
+                    userInterestList.map(data => {
+                      const isFirst = data.is_top_interest;
+                      if (data.interest_category === "Technology") {
+                        if (isFirst) {
+                          renderUserTechInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={techTopIcon}
+                                  alt="top tech icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserTechInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      } else if (data.interest_category === "Non-Tech") {
+                        if (isFirst) {
+                          renderUserNonTechInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={nonTechIcon}
+                                  alt="top non tech icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserNonTechInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      } else if (data.interest_category === "Entertainment") {
+                        if (isFirst) {
+                          renderUserEntertainmentInterestList.unshift(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div className="interest-top-icon" id={data.id}>
+                                &lt;img
+                                  className="top-interest-icon"
+                                  src={entertainmentIcon}
+                                  alt="top entertainment icon"
+                                />
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        } else {
+                          renderUserEntertainmentInterestList.push(
+                            &lt;div
+                              className="interest-list-item"
+                              key={`${data.id};${data.interest_name}`}
+                              id={data.id}
+                            >
+                              &lt;div
+                                className="delete-icon-wrap"
+                                onClick={this.handleDelete}
+                                id={data.id}
+                              >
+                                &lt;img src={rubbishBin} alt="delete-icon" />
+                              &lt;/div>
+                              &lt;div className="interest-name">
+                                &lt;p>{data.interest_name}&lt;/p>
+                              &lt;/div>
+                              &lt;div
+                                className="interest-top-icon"
+                                onClick={this.handleMoveTop}
+                                id={data.id}
+                              >
+                                &lt;img
+                                  className="like-img"
+                                  src={likeIcon}
+                                  alt="move item icon"
+                                />
+                                &lt;span className="tooltip-text">
+                                  Click to set as your top interest!
+                                &lt;/span>
+                              &lt;/div>
+                            &lt;/div>
+                          );
+                        }
+                      }
+
+                      return null;
+                    });
+                  }
+
+                  return (
+                    &lt;EditProfileInterestPageContainer>
+                      &lt;Section title="Edit Interest">
+                        &lt;div className="technology-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Technology&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="technology"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.techSearchString}
+                                  placeholder="Input your interest (ex: Web Development)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="tech-interest-data">
+                                &lt;div className="search-options">
+                                  {isTechFocus && (
+                                    &lt;ul className="search-result">{techSearchData}&lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserTechInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserTechInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div className="non-tech-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Non-Technology&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="non-tech"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.nonTechSearchString}
+                                  placeholder="Input your interest (ex: Photography)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="non-tech-interest-data">
+                                &lt;div className="search-options">
+                                  {isNonTechFocus && (
+                                    &lt;ul className="search-result">{nonTechSearchData}&lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserNonTechInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserNonTechInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div className="entertainment-card-wrap">
+                          &lt;Card>
+                            &lt;h2>Entertainment&lt;/h2>
+                            &lt;div className="content">
+                              &lt;div className="search-container">
+                                &lt;img src={SearchIcon} alt="search-icon.svg" />
+                                &lt;input
+                                  type="text"
+                                  id="entertainment"
+                                  className="searchbar"
+                                  onChange={this.handleSearch}
+                                  value={this.state.entertainmentSearchString}
+                                  placeholder="Input your interest (ex: Pokemon)"
+                                  onFocus={this.handleFocus}
+                                  onBlur={this.handleBlur}
+                                />
+                              &lt;/div>
+                              &lt;div className="entertainment-interest-data">
+                                &lt;div className="search-options">
+                                  {isEntertainmentFocus && (
+                                    &lt;ul className="search-result">
+                                      {entertainmentSearchData}
+                                    &lt;/ul>
+                                  )}
+                                &lt;/div>
+                                &lt;div className="interest-list">
+                                  {isEditInterestLoading ? (
+                                    &lt;Spinner />
+                                  ) : renderUserEntertainmentInterestList.length === 0 ? (
+                                    renderEmptyList
+                                  ) : (
+                                    renderUserEntertainmentInterestList
+                                  )}
+                                &lt;/div>
+                              &lt;/div>
+                            &lt;/div>
+                          &lt;/Card>
+                        &lt;/div>
+
+                        &lt;div
+                          className="back-button-wrap"
+                          onClick={() => this.props.push("/profile")}
+                        >
+                          &lt;Buttons name="OK" wide="6rem" />
+                        &lt;/div>
+                      &lt;/Section>
+                    &lt;/EditProfileInterestPageContainer>
+                  );
+                }
               }
+
+              EditProfileInterestPage.propTypes = {
+                push: PropTypes.func.isRequired,
+                isEditInterestLoading: PropTypes.bool.isRequired,
+                isEditInterestLoaded: PropTypes.bool.isRequired,
+                userInterestList: PropTypes.shape().isRequired,
+                fetchUserInterest: PropTypes.func.isRequired,
+                user: PropTypes.func.isRequired,
+                postUserInterest: PropTypes.func.isRequired,
+                deleteUserInterest: PropTypes.func.isRequired,
+                patchUserInterest: PropTypes.func.isRequired,
+                postInterestResponse: PropTypes.object.isRequired,
+                deleteInterestResponse: PropTypes.object.isRequired,
+                patchInterestResponse: PropTypes.object.isRequired
+              };
+
+              function mapStateToProps(state) {
+                return {
+                  isEditInterestLoading: isEditInterestLoading(state),
+                  isEditInterestLoaded: isEditInterestLoaded(state),
+                  userInterestList: getInterestList(state),
+                  user: getUser(state),
+                  postInterestResponse: getPostInterestResponse(state),
+                  deleteInterestResponse: getDeleteInterestResponse(state),
+                  patchInterestResponse: getPatchInterestResponse(state)
+                };
+              }
+
+              function mapDispatchToProps(dispatch) {
+                return {
+                  fetchUserInterest: id => dispatch(fetchUserInterest(id)),
+                  postUserInterest: payload => dispatch(postUserInterest(payload)),
+                  deleteUserInterest: id => dispatch(deleteUserInterest(id)),
+                  push: url => dispatch(push(url)),
+                  patchUserInterest: id => dispatch(patchUserInterest(id))
+                };
+              }
+
+              export default connect(
+                mapStateToProps,
+                mapDispatchToProps
+              )(EditProfileInterestPage);
             </code></pre>
           </section>
         </section>
@@ -816,7 +3493,396 @@
               }
             </code></pre>
           </section>
+
+          <!-- Subslide 4.8 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #5: <span style="text-transform: none;">useCallback</span></h2>
+          </section>
+
+          <!-- Subslide 4.8a -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #5: <span style="text-transform: none;">useCallback</span></h2>
+            A <u>very powerful alternative</u> to useState.
+          </section>
+
+          <!-- Subslide 4.8b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #5: <span style="text-transform: none;">useCallback</span></h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+
+            </code></pre>
+          </section>
+
+          <!-- Subslide 4.9 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #6: <span style="text-transform: none;">useMemo</span></h2>
+          </section>
+
+          <!-- Subslide 4.9a -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #6: <span style="text-transform: none;">useMemo</span></h2>
+            A <u>very powerful alternative</u> to useState.
+          </section>
+
+          <!-- Subslide 4.9b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #6: <span style="text-transform: none;">useMemo</span></h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+
+            </code></pre>
+          </section>
+
+          <!-- Subslide 4.10 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #7: <span style="text-transform: none;">useRef</span></h2>
+          </section>
+
+          <!-- Subslide 4.10a -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #7: <span style="text-transform: none;">useRef</span></h2>
+            A <u>very powerful alternative</u> to useState.
+          </section>
+
+          <!-- Subslide 4.10b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
+            <h2 style="color: #61DAFB;">Hooks #7: <span style="text-transform: none;">useRef</span></h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+
+            </code></pre>
+          </section>
         </section>
+
+        <!-- Slide 5 - Data Fetching with React Hooks -->
+        <section>
+          <!-- Subslide 5.1 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="color: #61DAFB; margin: 0;">Data Fetching</h2>
+            <p style="font-size: 1.5rem; margin: 0 3px; text-transform: none;">using React Hooks ⚛️</p>
+          </section>
+
+          <!-- Subslide 5.2a -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Data Fetching</h2>
+            <h2 style="color: #61DAFB; margin: 0;">Review: Lifecycle Methods ♲</h2>
+            <div style="display: flex; justify-content: space-between;">
+              <div style="width: 45%;">
+                <ul style="font-size: 2rem;">
+                  <li>Hooks equivalent of <u style="color: orange;">componentDidMount</u></li>
+                  <li>Only runs once when component mounts</li>
+                  <li>Use empty dependency array</li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="4-6"
+                >
+                  import React, { useEffect } from "react";
+
+                  const Component = () => {
+                    useEffect(() => {
+                      console.log("Behavior before the component is added to the DOM");
+                    }, []);
+
+                    return &lt;h1>Hello World&lt;/h1>;
+                  };
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 5.2b -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Data Fetching</h2>
+            <h2 style="color: #61DAFB; margin: 0;">Review: Lifecycle Methods ♲</h2>
+            <div style="display: flex; justify-content: space-between;">
+              <div style="width: 49.5%;">
+                <ul style="font-size: 2rem;">
+                  <li>Hooks equivalent of <u style="color: greenyellow;">componentDidUpdate</u></li>
+                  <li>Runs everytime the component re-renders (setState, props change)</li>
+                  <li>Does not take dependency array as argument</li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="4-6"
+                >
+                  import React, { useEffect } from "react";
+
+                  const Component = () => {
+                    useEffect(() => {
+                      console.log("Behavior when the component receives new state or props.");
+                    });
+
+                    return &lt;h1>Hello World&lt;/h1>;
+                  };
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 5.2c -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Data Fetching</h2>
+            <h2 style="color: #61DAFB; margin: 0;">Review: Lifecycle Methods ♲</h2>
+            <div style="display: flex; justify-content: space-between;">
+              <div style="width: 49.5%;">
+                <ul style="font-size: 2rem;">
+                  <li>Hooks equivalent of <u style="color: lightskyblue;">componentWillUnmount</u></li>
+                  <li>Runs right before the component is unmounted</li>
+                  <li>Use return statement that acts as a clean up function</li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers="4-6"
+                >
+                  import React, { useEffect } from "react";
+
+                  const Component = () => {
+                    useEffect(() => {
+                      return () => {
+                        console.log("Behavior right before the component is removed from the DOM.");
+                      }
+                    }, []);
+
+                    return &lt;h1>Hello World&lt;/h1>;
+                  };
+                </code></pre>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subslide 5.2d -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="font-size: 2rem; margin: 0;">Data Fetching</h2>
+            <h2 style="color: #61DAFB; margin: 0;">Review: Lifecycle Methods ♲</h2>
+            <div style="display: flex; justify-content: space-between;">
+              <div style="width: 49.5%;">
+                <ul style="font-size: 2rem;">
+                  <li>You can combine lifecycles in one useEffect</u></li>
+                  <li><u style="color: orange;">componentDidMount</u> + <u style="color: lightskyblue;">componentWillUnmount</u></li>
+                </ul>
+              </div>
+
+              <div style="width: 50%;">
+                <pre style="margin: 0;"><code
+                  class="lang-javascript"
+                  style="font-size: 0.85rem;"
+                  data-trim
+                  data-noescape
+                  data-line-numbers
+                >
+                  import React, { useEffect } from "react";
+
+                  const Component = () => {
+                    useEffect(() => {
+                      const intervalId = setInterval(() => {
+                        document.title = `Time is: ${new Date()}`;
+                      }, 1000);
+
+                      return () => {
+                        document.title = "Time stopped.";
+                        clearInterval(intervalId);
+                      }
+                    }, []);
+
+                    return &lt;h1>What time is it?&lt;/h1>;
+                  };
+                </code></pre>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Slide 6 - Custom Hook -->
+        <section>
+          <!-- Subslide 6.1 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="color: #61DAFB; margin: 0;">Custom Hooks 🛠</h2>
+            <h2 style="font-size: 2rem; margin: 0; text-transform: none;">aka. MTV's Pimp My Hook</h2>
+          </section>
+
+          <!-- Subslide 6.2 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="color: #61DAFB; margin: 0;">Custom Hooks 🛠</h2>
+            A custom Hook is a JavaScript function whose name starts with ”use” and that may call other Hooks
+          </section>
+
+          <!-- Subslide 6.3 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+            <h2 style="color: #61DAFB; margin: 0;">Custom Hooks 🛠</h2>
+            Custom Hooks are a convention that naturally follows from the design of Hooks, rather than a React feature.
+          </section>
+
+          <!-- Subslide 6.4 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+          <h2 style="font-size: 2rem; margin: 0;">Custom Hooks 🛠</h2>
+            <h2 style="color: #61DAFB; margin: 0; text-transform: none;">Example: useWindowSize</h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              const useWindowSize = () => {
+                // Declare a new state variable with the "useState" Hook
+                const [width, setWidth] = useState<number | null>(window.innerWidth)
+
+                useEffect(() => {
+                  /* Set a variable "mounted" as an indicator
+                      when a component is just mounted */
+                  let mounted: boolean = true
+
+                  /* Inside of a "useEffect" hook add an event listener that updates
+                      the "width" state variable when the window size changes */
+                  if (mounted) window.addEventListener("resize", () => setWidth(window.innerWidth))
+
+                  /* Set the value of "mounted" as false
+                      and return it as a clean up for the function */
+                  return () => {
+                  mounted = false
+                  window.removeEventListener("resize", () => {})
+                  }
+
+                  /* passing an empty array as the dependencies of the effect will cause this
+                      effect to only run when the component mounts, and not each time it updates.
+                      We only want the listener to be added once */
+                }, [])
+
+                return width
+              }
+            </code></pre>
+          </section>
+
+          <!-- Subslide 6.5 -->
+          <section
+            style="text-align: left;"
+            data-auto-animate
+          >
+          <h2 style="font-size: 2rem; margin: 0;">Custom Hooks 🛠</h2>
+            <h2 style="color: #61DAFB; margin: 0; text-transform: none;">Example: useProfile</h2>
+            <pre style="margin: 0;"><code
+              class="lang-javascript"
+              style="font-size: 0.85rem;"
+              data-trim
+              data-noescape
+              data-line-numbers
+            >
+              const useProfile = () => {
+                const [profile, setProfile] = useState('loading');
+
+                useEffect(() => {
+                  const response = axios.get(profileApi);
+
+                  response.then((result) => {
+                    setProfile(result.data)
+                  }).catch((err) => {
+                    setProfile('error')
+                  })
+
+                }, [])
+
+                return profile;
+              }
+            </code></pre>
+          </section>
         </section>
       </div>
     </div>
