@@ -3510,7 +3510,7 @@
           >
             <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
             <h2 style="color: #61DAFB;">Hooks #5: <span style="text-transform: none;">useCallback</span></h2>
-            A <u>very powerful alternative</u> to useState.
+            A hook to save you from <u>re-calling expensive functions</u>.
           </section>
 
           <!-- Subslide 4.8b -->
@@ -3527,7 +3527,17 @@
               data-noescape
               data-line-numbers
             >
+              const fetchUser = useCallback(async () => {
+                const res = await fetch(
+                  `https://jsonplaceholder.typicode.com/users/${userId}`
+                );
+                const newUser = await res.json();
+                setUser(newUser);
+              }, [userId]);
 
+              useEffect(() => {
+                fetchUser();
+              }, [fetchUser]); // ✅ fetchUser stays the same between renders
             </code></pre>
           </section>
 
@@ -3547,7 +3557,7 @@
           >
             <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
             <h2 style="color: #61DAFB;">Hooks #6: <span style="text-transform: none;">useMemo</span></h2>
-            A <u>very powerful alternative</u> to useState.
+            A hook to save you from <u>re-doing expensive operations</u>.
           </section>
 
           <!-- Subslide 4.9b -->
@@ -3564,7 +3574,14 @@
               data-noescape
               data-line-numbers
             >
-
+              function UserList({ query, users }) {
+                // ✅ Recalculated when query or users change
+                const filteredUsers = useMemo(
+                  () => filter(nameIncludes(query), users),
+                  [query, users]
+                );
+                // ...
+              }
             </code></pre>
           </section>
 
@@ -3584,7 +3601,7 @@
           >
             <h2 style="font-size: 2rem; margin: 0;">React Hooks ⚛️</h2>
             <h2 style="color: #61DAFB;">Hooks #7: <span style="text-transform: none;">useRef</span></h2>
-            A <u>very powerful alternative</u> to useState.
+            Say goodbye to <u>documents.getElementsBy</u>
           </section>
 
           <!-- Subslide 4.10b -->
@@ -3601,7 +3618,19 @@
               data-noescape
               data-line-numbers
             >
-
+              function TextInputWithFocusButton() {
+                const inputEl = useRef(null);
+                const onButtonClick = () => {
+                  // `current` points to the mounted text input element
+                  inputEl.current.focus();
+                };
+                return (
+                  &lt;>
+                    &lt;input ref={inputEl} type="text" />
+                    &lt;button onClick={onButtonClick}>Focus the input&lt;/button>
+                  &lt;/>
+                );
+              }
             </code></pre>
           </section>
         </section>
