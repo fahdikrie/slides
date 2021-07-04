@@ -23,8 +23,12 @@ export default function Home() {
 
         <div className={styles.grid}>
           <a href="/hooks.html" className={styles.card}>
-            <h2>Hooks &rarr;</h2>
-            <p>Learn about hooks in an interactive course with reveal.js!</p>
+            <h2>React Lifecycle & Hooks &rarr;</h2>
+            <p>Learn about react lifecycle & hooks in an interactive course with reveal.js!</p>
+          </a>
+          <a href="/redux.html" className={styles.card}>
+            <h2>Redux at a Glance &rarr;</h2>
+            <p>Learn about redux and redux toolkit in an interactive course with reveal.js!</p>
           </a>
         </div>
       </main>
